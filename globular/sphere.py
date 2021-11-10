@@ -5,6 +5,8 @@ Creating a sphere consisting of faces and triangular meshes.
 from .vector import Vector
 from .mesh import MeshData
 
+import numpy as np
+
 def create_face(normal, resolution):
     axisA = Vector(normal.y, normal.z, normal.x)
     axisB = normal.cross(axisA)
@@ -41,4 +43,13 @@ def generate_cube_faces(resolution):
         face_mesh = create_face(normal, resolution)
         all_meshes.append(face_mesh)
 
+    return all_meshes
+
+def cube_to_sphere(p):
+    return p.normalize()
+
+def generate_sphere_faces(resolution):
+    all_meshes = generate_cube_faces(resolution)
+    for mesh in all_meshes:
+        mesh.vertices = np.array([cube_to_sphere(Vector(*v)).array() for v in mesh.vertices])
     return all_meshes

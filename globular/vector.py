@@ -52,10 +52,24 @@ class Vector(object):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __truediv__(self, other):
+        if isinstance(other, (float,int)):
+            return Vector(self.x / other, self.y / other, self.z / other)
+        elif isinstance(other, Vector):
+            return Vector(self.x / other.x, self.y / other.y, self.z / other.z)
+
+    def __rtruediv__(self, other):
+        return other.__div__(self)
+
     def array(self):
         return [self.x,self.y,self.z]
 
     def cross(self, vec):
         cross = np.cross(self.array(), vec.array())
         return Vector(*cross)
+
+    def normalize(self):
+        length = np.linalg.norm(self.array())
+        norm = self / length
+        return norm
 
