@@ -53,3 +53,29 @@ def generate_sphere_faces(resolution):
     for mesh in all_meshes:
         mesh.vertices = np.array([cube_to_sphere(Vector(*v)).array() for v in mesh.vertices])
     return all_meshes
+
+def point_to_coordinate(point, sphere_radius=1):
+    u = (np.pi + np.arctan2(point.x, -point.z)) / (2*np.pi)
+    v = (np.pi/2.0 + np.arcsin(point.y)) / np.pi
+    v = 1 - v # because of inverted image y axis
+    #u = np.arctan2(point.x, -point.y) / (2*np.pi)
+    #v = np.arcsin(point.z) / np.pi
+    #u = np.arctan(point.x / point.y)
+    #v = np.arccos(point.z / sphere_radius)
+    #u = 0.5 + np.arctan2(point.y, point.x) / (2*np.pi)
+    #v = 0.5 + np.arctan2(point.z, sphere_radius) / (2*np.pi)
+    return u,v
+
+def sphere_point_height_mapping(point, heightmap):
+    lon,lat = point_to_coordinate(point)
+    lat_pixel = heightmap.shape[0] * lat
+    lon_pixel = heightmap.shape[1] * lon
+    height = heightmap[lat_pixel,lon_pixel]
+    return height
+
+def sphere_point_texture_mapping(point, texture):
+    lon,lat = point_to_coordinate(point)
+    lat_pixel = texture.shape[0] * lat
+    lon_pixel = texture.shape[1] * lon
+    color = texture[lat_pixel,lon_pixel]
+    return color
