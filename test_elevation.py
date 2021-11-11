@@ -3,7 +3,7 @@ from globular.obj import dumps_trimesh
 from globular.sphere import generate_sphere_faces
 from globular.mesh import merge_meshes
 
-meshes = generate_sphere_faces(resolution=50)
+meshes = generate_sphere_faces(resolution=100)
 mesh = merge_meshes(*meshes)
 
 # randomly perturb length of each vertex
@@ -26,12 +26,32 @@ vertices = [Vector(*v)
 coordinates = [point_to_coordinate(v) for v in vertices]
 coordinates = [(u if not np.isnan(u) else 1, v if not np.isnan(v) else 1)
                 for u,v in coordinates]
-pixels = [(int(1-(heightmap.shape[1]-1)*u), int((heightmap.shape[0]-1)*v))
+pixels = [(int((heightmap.shape[1]-1)*u), int(1-(heightmap.shape[0]-1)*v))
             for u,v in coordinates]
 heights = [heightmap[py,px] for px,py in pixels]
 mesh.vertices = [(v + v*h).array()
                 for v,h in zip(vertices,heights)]
 
+# add in sphere texture coordinates
+from globular.vector import Vector
+from globular.sphere import point_to_coordinate
+from PIL import Image
+mesh.texture_coordinates = [point_to_coordinate(Vector(*v))
+                            for v in mesh.vertices]
+
+# write to file
 with open('test_elevation.obj', 'w') as fobj:
-    raw = dumps_trimesh(mesh)
+    raw = dumps_trimesh(mesh, name='globe', material='bluemarble', mtl_file='test_elevation.mtl')
+    fobj.write(raw)
+
+from globular.obj import dumps_texture_mtl, dumps_trimesh
+with open('test_elevation.mtl', 'w') as fobj:
+    raw = dumps_texture_mtl(bluemarble={'Ka':'1.0 1.0 1.0',
+                                        'Kd':'1.0 1.0 1.0',
+                                        'Ks':'1.0 1.0 1.0',
+                                        'Tr':'0.5',
+                                        'illum':1,
+                                        'Ns':0.0,
+                                        'map_Kd':'land_shallow_topo_2048.png',
+                                        })
     fobj.write(raw)
