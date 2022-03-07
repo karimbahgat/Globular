@@ -112,3 +112,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Large files
+gebco_2021_geotiff_small.tif

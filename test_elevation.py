@@ -14,13 +14,19 @@ mesh = merge_meshes(*meshes)
 #                for v in mesh.vertices]
 
 # load elevation from elevation data
+print('heightmap')
 from globular.vector import Vector
 from globular.sphere import point_to_coordinate
 from PIL import Image
 import numpy as np
-scale = 0.2
-heightmap = np.array(Image.open('land_shallow_topo_2048.png'))[:,:,1] # green band
-heightmap = heightmap / heightmap.max() * scale
+scale = 0.3
+#heightmap = np.array(Image.open('land_shallow_topo_2048.png'))[:,:,1] # green band
+heightmap = np.array(Image.open('gebco_2021_geotiff_small.tif'))
+print(heightmap.min(), heightmap.max())
+heightmap[heightmap < 0] = 0 # clamp at sealevel
+heightmap = (heightmap - heightmap.min()) / (heightmap.max() - heightmap.min())
+print(heightmap.min(), heightmap.max())
+heightmap *= scale
 vertices = [Vector(*v)
             for v in mesh.vertices]
 coordinates = [point_to_coordinate(v) for v in vertices]
@@ -33,6 +39,7 @@ mesh.vertices = [(v + v*h).array()
                 for v,h in zip(vertices,heights)]
 
 # add in sphere texture coordinates
+print('texture')
 from globular.vector import Vector
 from globular.sphere import point_to_coordinate
 from PIL import Image
@@ -40,8 +47,10 @@ mesh.texture_coordinates = [point_to_coordinate(Vector(*v))
                             for v in mesh.vertices]
 
 # write to file
+print('writing to file')
 with open('test_elevation.obj', 'w') as fobj:
     raw = dumps_trimesh(mesh, name='globe', material='bluemarble', mtl_file='test_elevation.mtl')
+    print(len(raw))
     fobj.write(raw)
 
 from globular.obj import dumps_texture_mtl, dumps_trimesh

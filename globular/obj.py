@@ -18,7 +18,6 @@ def dumps_trimesh(mesh, name=None, material=None, mtl_file=None):
     if name:
         raw += 'o {}\n'.format(name)
     for xyz in mesh.vertices:
-        xyz = map(float, xyz)
         raw += 'v {} {} {}\n'.format(*xyz)
     if mesh.texture_coordinates is None:
         # no texture
